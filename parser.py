@@ -481,6 +481,18 @@ def build_run_config() -> CrawlerRunConfig:
 	)
 
 
+def build_run_config_from_args(args: argparse.Namespace) -> CrawlerRunConfig:
+	"""Build Crawl4AI run config from CLI flags."""
+	return CrawlerRunConfig(
+		wait_until=args.wait_until,
+		scan_full_page=args.scan_full_page,
+		delay_before_return_html=args.delay_before_return_html,
+		page_timeout=max(1000, args.page_timeout_ms),
+		excluded_tags=["script", "style", "noscript"],
+		verbose=False,
+	)
+
+
 def _fmt_seconds(value: float) -> str:
 	"""Format elapsed time values for concise progress logs."""
 	return f"{value:.2f}s"
@@ -491,6 +503,10 @@ async def crawl_and_export(
 	output_root: Path,
 	max_concurrency: int,
 	retries: int,
+	run_config: CrawlerRunConfig,
+	request_timeout: float,
+	table_processing: bool,
+	append_table_div_html: bool,
 ) -> None:
 	output_root.mkdir(parents=True, exist_ok=True)
 	semaphore = asyncio.Semaphore(max_concurrency)
@@ -524,8 +540,8 @@ async def crawl_and_export(
 						print(f"[DEBUG] Starting fetch for {url} attempt {attempt}/{retries}", flush=True)
 						fetch_started = time.perf_counter()
 						result = await asyncio.wait_for(
-							crawler.arun(url=url, config=build_run_config()),
-							timeout=20.0
+							crawler.arun(url=url, config=run_config),
+							timeout=max(1.0, request_timeout)
 						)
 						fetch_elapsed = time.perf_counter() - fetch_started
 						print(
@@ -543,34 +559,36 @@ async def crawl_and_export(
 							raise RuntimeError("No markdown content returned")
 
 						table_started = time.perf_counter()
-						html_tables = extract_markdown_tables_from_html(raw_html)
-						if html_tables:
-							# The largest HTML table is usually the full technical specifications grid.
-							best_specs_table = max(html_tables, key=lambda t: t.count("\n"))
-							markdown = replace_flattened_markdown_table_section(
-								markdown=markdown,
-								section_heading="Specifications",
-								replacement_table_md=best_specs_table,
-								replacement_heading="Specifications (Parsed from HTML table)",
-							)
-							print(f"[STEP] {url} native html tables parsed: {len(html_tables)}")
+						if table_processing:
+							html_tables = extract_markdown_tables_from_html(raw_html)
+							if html_tables:
+								# The largest HTML table is usually the full technical specifications grid.
+								best_specs_table = max(html_tables, key=lambda t: t.count("\n"))
+								markdown = replace_flattened_markdown_table_section(
+									markdown=markdown,
+									section_heading="Specifications",
+									replacement_table_md=best_specs_table,
+									replacement_heading="Specifications (Parsed from HTML table)",
+								)
+								print(f"[STEP] {url} native html tables parsed: {len(html_tables)}")
 
-						table_div_html_blocks = extract_table_like_div_html_blocks(raw_html)
-						if table_div_html_blocks:
-							readable_tables = build_readable_tables_from_html_blocks(table_div_html_blocks)
-							print(
-								f"[STEP] {url} div-table blocks found: {len(table_div_html_blocks)}, parsed sections: {'yes' if readable_tables else 'no'}"
-							)
-							if readable_tables:
-								markdown = replace_flattened_system_specs(markdown, readable_tables)
-							html_blocks = "\n\n".join(
-								f"```html\n{block}\n```" for block in table_div_html_blocks
-							)
-							markdown = (
-								f"{markdown}\n\n"
-								f"## Table-like Div HTML (Original)\n\n"
-								f"{html_blocks}"
-							)
+							table_div_html_blocks = extract_table_like_div_html_blocks(raw_html)
+							if table_div_html_blocks:
+								readable_tables = build_readable_tables_from_html_blocks(table_div_html_blocks)
+								print(
+									f"[STEP] {url} div-table blocks found: {len(table_div_html_blocks)}, parsed sections: {'yes' if readable_tables else 'no'}"
+								)
+								if readable_tables:
+									markdown = replace_flattened_system_specs(markdown, readable_tables)
+								if append_table_div_html:
+									html_blocks = "\n\n".join(
+										f"```html\n{block}\n```" for block in table_div_html_blocks
+									)
+									markdown = (
+										f"{markdown}\n\n"
+										f"## Table-like Div HTML (Original)\n\n"
+										f"{html_blocks}"
+									)
 						table_elapsed = time.perf_counter() - table_started
 						print(f"[STEP] {url} table processing total: {_fmt_seconds(table_elapsed)}")
 
@@ -675,6 +693,53 @@ def parse_args() -> argparse.Namespace:
 		default=2,
 		help="Retry attempts per URL.",
 	)
+	parser.add_argument(
+		"--request-timeout",
+		type=float,
+		default=20.0,
+		help="Per-URL timeout (seconds) for crawl fetch+render.",
+	)
+	parser.add_argument(
+		"--page-timeout-ms",
+		type=int,
+		default=15000,
+		help="Crawl4AI page timeout in milliseconds.",
+	)
+	parser.add_argument(
+		"--delay-before-return-html",
+		type=float,
+		default=0.3,
+		help="Extra wait (seconds) before collecting rendered HTML.",
+	)
+	parser.add_argument(
+		"--wait-until",
+		default="networkidle",
+		help="Playwright wait condition passed to Crawl4AI (e.g., load, domcontentloaded, networkidle).",
+	)
+	parser.add_argument(
+		"--scan-full-page",
+		action=argparse.BooleanOptionalAction,
+		default=True,
+		help="Enable/disable full-page scanning in Crawl4AI.",
+	)
+	parser.add_argument(
+		"--table-processing",
+		action=argparse.BooleanOptionalAction,
+		default=True,
+		help="Enable/disable HTML-table and div-table markdown reconstruction.",
+	)
+	parser.add_argument(
+		"--append-table-div-html",
+		action=argparse.BooleanOptionalAction,
+		default=True,
+		help="Append original table-like div HTML blocks into output markdown.",
+	)
+	parser.add_argument(
+		"--limit",
+		type=int,
+		default=0,
+		help="Process only the first N URLs from input (0 = all).",
+	)
 	return parser.parse_args()
 
 
@@ -690,6 +755,10 @@ def main() -> None:
 	if not links:
 		print("No links found in input file.")
 		return
+	if args.limit > 0:
+		links = links[:args.limit]
+
+	run_config = build_run_config_from_args(args)
 
 	asyncio.run(
 		crawl_and_export(
@@ -697,6 +766,10 @@ def main() -> None:
 			output_root=Path(args.output),
 			max_concurrency=max(1, args.max_concurrency),
 			retries=max(1, args.retries),
+			run_config=run_config,
+			request_timeout=max(1.0, args.request_timeout),
+			table_processing=args.table_processing,
+			append_table_div_html=args.append_table_div_html,
 		)
 	)
 
