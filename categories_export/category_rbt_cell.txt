@@ -1,0 +1,6 @@
+=== RBT-Cell ===
+
+- https://www.arbin.com/battery-testing/rbt4-cell.html
+- https://www.arbin.com/battery-testing/lbts-cell.html
+- https://www.arbin.com/battery-testing/lbts-cell-high-volume.html
+- https://www.arbin.com/battery-testing/lbts-mztc.html
