@@ -47,6 +47,7 @@ Examples:
 Product → hardware specifications, current ranges, voltage ranges  
 Software → APIs, features, integrations  
 Technique → scientific methods (e.g. CCCV, EIS)  
+Units should not be included in the value column but can be mentioned in the notes or context if necessary for clarity.
 Article → industry news, research commentary  
 Resource → documentation, whitepapers, tutorials
 
@@ -83,7 +84,7 @@ All documents must begin with this metadata block.
 
 # Metadata
 
-| Field | Value |
+| Field | Value1 |
 |------|------|
 | Title | |
 | Page Type | |
@@ -112,23 +113,23 @@ Short factual description of the product.
 # Technical Specifications
 
 ## Electrical Specifications
-| Parameter | Value | Unit | Notes |
+| Parameter | Value1 | Value2 | Value3 | ... | Notes | (if multiple electrical specs exist, split into separate tables by category)
 
 ## Hardware Specifications
-| Parameter | Value | Unit | Notes |
+| Parameter | Value1 | Value2 | Value3 | ... | Notes | (if multiple hardware specs exist, split into separate tables by category)
 
 ## Measurement Specifications
-| Parameter | Value | Unit | Notes |
+| Parameter | Value1 | Value2 | Value3 | ... | Notes | (if multiple measurement specs exist, split into separate tables by category)
 
 ## Environmental / Temperature
-| Parameter | Value | Unit | Notes |
+| Parameter | Value1 | Value2 | Value3 | ... | Notes | (if multiple environmental specs exist, split into separate tables by category)
 
 ## General Specifications
-| Parameter | Value | Unit | Notes |
+| Parameter | Value1 | Value2 | Value3 | ... | Notes | (if general specs exist that don't fit other categories)
 
 # Test Techniques / Control Modes
 
-| Technique | Description | Key Parameters |
+| Technique | Description | Key Parameters | 
 
 # Software Integration
 
@@ -167,7 +168,7 @@ Break large sections into logical subsections if necessary.
 
 # Data / Statistics
 
-| Metric | Value | Context |
+| Metric | Value1 | Value2 | Value3 | ... | Context | Notes | 
 
 # Industry Context
 
@@ -256,10 +257,13 @@ Output
 
 SPECIFICATION MATRIX RULE
 
-If multiple configuration params exist, split them as slash "/"
-Example
-| Parameter | config1/config2/config3 | Unit |
-
+If multiple configuration params exist, split them as slash "/" . DO NOT group all cases into 1 value. Instead, split into separate columns for each case. DO NOT drop any cases. 
+Example: 
+| Parameter | Value 1 | Value 2 | Value 3 | Value 4 | Value 5 | Value 6 | Value 7 | Value 8 | Value 9 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Number of Channels | 48 | 12 | 12 | 48 | 12 | 12 | 32 | 8 | 8 | |
+| Voltage Ranges | -6V/6V | -6V/6V | -6V/6V | 2V/10V | 2V/10V | 2V/10V | 2V/20V | 2V/20V | 2V/20V | V |
+| Current Ranges | 100A/25A | 300A/150A/50A | 400A/200A/50A | 100A/25A | 300A/150A/50A | 400A/200A/50A | 100A/25A | 300A/150A/50A | 400A/200A/50A |
 --------------------------------
 
 STEP 6 — PARAMETER NORMALIZATION
@@ -311,7 +315,6 @@ FORMATTING RULES
 
 Use Markdown only  
 Use tables for structured data  
-Units must be separate from values  
 Use sentence case for parameter names  
 Do not explain the transformation  
 

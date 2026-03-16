@@ -1,0 +1,63 @@
+# Source
+
+- URL: https://www.arbin.com/managing-your-arbin-systems-with-central-monitor-and-control-solution-cmcs.html
+
+# Content
+
+#  Managing Your Arbin Systems with Central Monitor and Control Solution (CMCS)
+September 20, 2021
+When it comes to research and testing, two factors have a significant influence on the usefulness of your results: the quality and the quantity of your data. The advantages of quality battery test data are obvious – reliable results make research more efficient and simplify decision-making based on that data. Yet due to the variable nature of certain types of testing, including battery testing, having a wealth of relevant data is also important for actionable results. 
+A greater amount of data provides more reliability in overall results, as you are basing decision on a larger data set, rather than fewer data points that may be outliers. A larger dataset also makes it easier to identify trends in battery performance and build reliable performance models based on clear trends. Ultimately, a greater amount of data provides greater certainty and accuracy as you make decisions in battery development. 
+Generating the large amount of data you need for reliable results will often require a large number of Arbin cyclers (battery testers). Our battery test equipment, including cyclers and auxiliary options are designed to address a range of testing applications: cell battery testing, regenerative battery testing, high-precision testing, and more. Regardless of your particular application, increasing the number of Arbin battery testers that are running tests provides you with more of the data that you need, in a shorter amount of time. However, this can create new hurdles, as the larger number of cyclers can make battery test lab management more difficult. 
+## **The Challenges of Managing Multiple Cyclers**
+With a laboratory or facility filled with Arbin cyclers, managing each one individually can become extremely time-consuming. Tests have to be scheduled, started, and stopped directly with each battery tester. Identifying and resolving issues that arise, and resuming tests once an issue has been resolved, adds to the maintenance time that means active tests are not running. 
+Clearly, in-person management is inefficient, and becomes impractical with a greater number of Arbin battery testers to manage. When testing managers must go to each cycler and cycler PC to review test data and manage test operations, product time is lost as they move between battery test equipment. If your research team can only identify and address issues when they are physically at the affected machine, that only increases the amount of downtime between active testing. 
+In addition to testing efficiency and researcher productivity, a multiple-cycler system has implications for managing the safety of your facility. Errors and other issues in battery testing can easily become dangerous for your team. Managing battery testers on an individual basis means it takes longer to be alerted of a potential situation and then address it appropriately. This is especially true when there is no notification system and you only become aware of potentially hazardous or dangerous conditions when you are at the affected cycler. 
+At the same time, one-to-one management of multiple cyclers has implications for battery test data management. This limitation makes it more difficult to get an overview of battery tester statuses and overall testing progress. Only viewing one battery tester and dataset at a time makes it harder to see the full picture of your testing situation – which means even more work and more time to make changes or decisions based on the test results. 
+These challenges are where Arbin’s Central Monitor and Control Solution can help facilitate more efficient cycler oversight and management, as well as tester data control. 
+## **Simplifying Battery Tester Management with Central Monitor and Control Solution (CMCS)**
+Arbin’s Central Monitor and Control Solution (CMCS) simplifies battery test equipment management so you can more efficiently manage a multi-Arbin cycler testing ecosystem. CMCS builds onto Arbin’s MITS Pro software, enabling more features for battery test equipment management. Networking Arbin systems (Arbin cycler and cycler PC) with one or more client PCs, this solution has two key components: ArbinViewer and the CTI Interface. ArbinViewer allows oversight and control of each networked cycler from a connected client PC. The CTI Interface allows for third-party management of battery testers using TCP, DLL, or LabView (DLL). 
+###### ![](https://www.arbin.com/wp-content/uploads/2021/09/CMCS-Structure-1024x631-3.png)
+###### **Manage Multiple Cyclers with Arbin’s Central Monitor and Control Solution**
+With Arbin’s CMCS, your battery test equipment management is simplified in four key ways. You can oversee test status and test results from multiple cyclers on a connected PC and control testing across the network, along with user access levels. In addition, CMCS enables you to receive email or SMS notifications on battery tester status and performance. Finally, this Arbin solution allows for the integration of Arbin cycler data with third-party systems and data analysis tools. Each advantage is described in more detail below. 
+## **1. Oversee Test Status and Test Results**
+The Central Monitor and Control Solution allows you to view test statuses for multiple networked cycler systems (Arbin cycler and cycler PC) on one or more networked client PCs. With this feature, you can quickly review the test status of multiple battery testers with testing in progress. You can also identify and address issues as they arise, rather than as you check each machine – making testing more efficient. 
+###### ![GIF showing remote, networked PC managing multiple battery testing systems](https://www.arbin.com/wp-content/uploads/2021/09/6148f2f820ffe-2.gif)
+###### **View Testing Status for Multiple Networked Arbin Cyclers and PCs**
+CMCS also offers the ability to view test results data from the networked battery testers on your connected PC. ArbinViewer provides a list of all networked Arbin cyclers with color-coding to identify the current connection status. 
+###### ![Screneshot of ArbinViewer showing the list of networked cyclers](https://www.arbin.com/wp-content/uploads/2021/09/Picture3-2.png)
+###### **Oversee Each Networked Cycler’s Testing Status in Monitor View**
+Within ArbinViewer, you can search for a specific cycler by IP address and view detailed data for that cycler, or use the Brief View option for a color-coded summary of charge status for each connected Arbin battery tester.
+## **2. Control Tests and User Access**
+Arbin’s CMCS feature goes beyond oversight to let you actively manage test activity across networked cyclers, even from a remote PC that is connected to the network. This management functionality includes the ability to assign test schedules to specific Arbin battery test equipment, as well as to start, stop, and resume tests on specific channels.
+###### ![GIF of person working at computer; assign, start, and stop commands appear next to the computer.](https://www.arbin.com/wp-content/uploads/2021/09/CentralServer_Point2_GIF-2.gif)
+###### **Assign, Start, and Stop Tests Across Networked Cyclers**
+You can also control the level of access different users have to manage the Arbin cyclers and tests. CMCS lets you set a maximum number of concurrent users, which prevents a negative impact on test results. Built-in user access levels allow you to assign access for “super” users who cannot be disconnected and “normal” users who can be disconnected. This lets you effectively control management of battery tester functions and test schedules. 
+###### ![Screenshots of User Login Interface and Active Users Screens](https://www.arbin.com/wp-content/uploads/2021/09/MicrosoftTeams-image-2.png)
+###### **Manage Levels of Access to Control Battery Tester Management**
+## **3. Receive Notifications on Cycler Status**
+Another way that Central Monitor and Control Solution can streamline your battery testing process is by sending notifications regarding cycler status. CMCS can automatically send an email or SMS to indicated users under specific conditions, such as when a cycler channel in testing has become unsafe, or when a test has completed.
+######  ![Vector image of phone with a comment bubble and exclamation point to show a notification](https://www.arbin.com/wp-content/uploads/2021/09/message_10__Converted_-ai-e1632169628177-1024x1024-3.png)  
+
+######  **Receive email or SMS Notifications for Specific Cycler Conditions  
+**[ _Message Vectors by Vecteez_ y](https://www.vecteezy.com/free-vector/message)
+Up to three people can be registered to receive notifications through email or SMS with CMCS. With this feature, you can quickly address issues or restart tests – and identify when an issue may need to be resolved in person. The notifications from CMCS will reduce downtime from unsafe tests that have been stopped, as well as between successfully completed tests. 
+## **4. Integrate Battery Tester Data with Third-Party Tools**
+The final key advantage that Arbin’s CMCS provides for a multi-Arbin cycler ecosystem is the ability to integrate cycler data with third-party data analysis tools. Using the Console TCP/IP Interface, third-party software can take control of your Arbin battery test equipment via TCP, DLL, or Labview (DLL). This method makes it possible to integrate Arbin battery testers into a larger testing ecosystem that includes third-party test equipment.
+![GIF showing a battery tester lab with multiple workstations and a representation of the DataWatcher interface appearing in front](data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%200%200'%3E%3C/svg%3E)
+###### **Integrate Cycler Data with Data Analysis Tools**
+The automatic CSV export is another CMCS feature that facilitates more flexible use of your testing data. Data files stored in CSV format are easily accessed and managed, while providing a backup of data that gives you greater security and peace of mind. It also allows for convenient integration of your Arbin cycler testing data into data analysis software and the ability to stream CSV data for real-time analysis, through integration with third-party data analysis tools. 
+## **Arbin’s CMCS as Part of Your Battery Testing Ecosystem**
+The Central Monitor and Control Solution provides a convenient way to oversee and manage multiple Arbin cyclers. For your facility and testing process, that means a better use of both your time and your battery testing resources. The reduced time spent on management tasks results in more time that can be dedicated to productive testing. 
+CMCS is just one part of Arbin’s full battery testing solution, which includes Arbin battery test equipment, auxiliary test equipment options, software, and several layers of data management solutions to address your next battery testing challenge. For those who want more security and accessibility for battery testing data, Arbin’s Central Data Solution allows you to backup data to a central network or cloud-based server. 
+Learn more about how adding CMCS to Arbin’s battery testing software can bring efficient and effective management to your specific testing applications. [**Request a quote**](https://www.arbin.com/request-a-quote/) or more information today – our expert team will help you identify the right testing equipment and data solutions for your organization’s needs. 
+Posted in [Arbin News](https://www.arbin.com/category/arbin-news.html)
+[ ![Arbin Team](https://secure.gravatar.com/avatar/1fbb2cb48e39ebefa1c1ce89417a209646a543accdad521cbdd22b968d3a6b95?s=300&d=mm&r=g)](https://www.arbin.com)
+###  [ Arbin Team ](https://www.arbin.com)
+  * [ Visit author's facebook profile ](https://www.facebook.com/ArbinInstruments/)
+  * [ Visit author's linkedin profile ](https://www.linkedin.com/company/arbin-instruments/)
+  * [ Visit author's youtube profile ](https://www.youtube.com/channel/UCw-WJk0lBTGXPdSac4Xx8CA)
+
+Posts navigation
+[← Arbin Instruments Establishes Office in Pune, India](https://www.arbin.com/arbin-instruments-establishes-office-in-pune-india.html)
+[Three Benefits of Central Battery Test System Control →](https://www.arbin.com/three-benefits-of-central-battery-test-system-control.html)
