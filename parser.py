@@ -28,6 +28,7 @@ _HEADING_LINE_RE = re.compile(r"^(#{1,4})\s+(.+?)\s*$")
 _STRIP_MARKUP_RE = re.compile(r"!?\[[^\]]*\]\([^)]+\)|[`*_>#]")
 _SLUG_STOP = frozenset({"product", "products", "category", "tag", "page", "html"})
 _SHORT_VALUE_LINE_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9%+\-./<>=~()\sx\"']*$")
+_DEFAULT_FOOTER_MARKERS: tuple[str, ...] = ()
 
 _TABLE_DIV_XPATH = (
 	"//div["
@@ -38,7 +39,7 @@ _TABLE_DIV_XPATH = (
 _TABLE_TOKEN_RE = re.compile(r"(?:^|[^a-z])table(?:[^a-z]|$)", re.IGNORECASE)
 
 
-def _slug_tokens(url: str) -> set[str]:
+def _slug_tokens(url: str, slug_stop: frozenset[str] | set[str] | None = None) -> set[str]:
 	"""Extract meaningful tokens from the URL path for heading matching."""
 	from urllib.parse import urlparse as _urlparse
 	path = _urlparse(url).path
@@ -46,10 +47,15 @@ def _slug_tokens(url: str) -> set[str]:
 	for seg in path.split("/"):
 		seg = seg.removesuffix(".html")
 		tokens.extend(_SLUG_TOKEN_RE.findall(seg.lower()))
-	return {t for t in tokens if t not in _SLUG_STOP}
+	stopwords = _SLUG_STOP if slug_stop is None else slug_stop
+	return {t for t in tokens if t not in stopwords}
 
 
-def _find_content_start(lines: list[str], url: str) -> int:
+def _find_content_start(
+	lines: list[str],
+	url: str,
+	slug_stop: frozenset[str] | set[str] | None = None,
+) -> int:
 	"""
 	Return the index of the line where real page content begins.
 
@@ -61,7 +67,7 @@ def _find_content_start(lines: list[str], url: str) -> int:
 	     the first H1 or H2 heading anywhere in the first 300 lines.
 	  3. If still nothing, keep the full output (start at 0).
 	"""
-	url_tokens = _slug_tokens(url)
+	url_tokens = _slug_tokens(url, slug_stop=slug_stop)
 
 	best_idx = -1
 	best_score = 0.0
@@ -116,6 +122,24 @@ def read_links(file_path: Path) -> list[str]:
 			continue
 		links.append(clean)
 	return links
+
+
+def read_config_lines(file_path: str | None) -> list[str]:
+	"""Read non-empty, non-comment lines from a txt config file."""
+	if not file_path:
+		return []
+	path = Path(file_path)
+	if not path.exists():
+		raise FileNotFoundError(f"Config file not found: {path}")
+
+	lines = path.read_text(encoding="utf-8").splitlines()
+	out: list[str] = []
+	for line in lines:
+		clean = line.strip().lstrip("\ufeff")
+		if not clean or clean.startswith("#"):
+			continue
+		out.append(clean)
+	return out
 
 
 def configure_console_encoding() -> None:
@@ -399,7 +423,12 @@ def replace_flattened_system_specs(markdown: str, parsed_tables: str) -> str:
 	return f"{markdown}\n\n{section}".strip()
 
 
-def clean_markdown_content(markdown: str, url: str = "") -> str:
+def clean_markdown_content(
+	markdown: str,
+	url: str = "",
+	footer_markers: tuple[str, ...] = _DEFAULT_FOOTER_MARKERS,
+	slug_stop: frozenset[str] | set[str] | None = None,
+) -> str:
 	"""Remove site header/navbar/footer noise from crawled markdown."""
 	if not markdown.strip():
 		return ""
@@ -407,23 +436,15 @@ def clean_markdown_content(markdown: str, url: str = "") -> str:
 	lines = markdown.splitlines()
 
 	# Skip everything before the primary content heading.
-	start_idx = _find_content_start(lines, url)
+	start_idx = _find_content_start(lines, url, slug_stop=slug_stop)
 	cleaned = lines[start_idx:]
 
-	# Cut common footer markers if present.
-	footer_markers = (
-		"ARBIN-logo_white.svg",
-		"Arbin Instruments. All Rights Reserved",
-		"Terms & Conditions",
-		"MITS accessibility statement",
-		"Voluntary Product Accessibility Template",
-	)
-
 	end_idx = len(cleaned)
-	for i, line in enumerate(cleaned):
-		if any(marker in line for marker in footer_markers):
-			end_idx = i
-			break
+	if footer_markers:
+		for i, line in enumerate(cleaned):
+			if any(marker in line for marker in footer_markers):
+				end_idx = i
+				break
 
 	body = "\n".join(cleaned[:end_idx])
 
@@ -507,6 +528,8 @@ async def crawl_and_export(
 	request_timeout: float,
 	table_processing: bool,
 	append_table_div_html: bool,
+	footer_markers: tuple[str, ...] = _DEFAULT_FOOTER_MARKERS,
+	slug_stop: frozenset[str] | set[str] | None = None,
 ) -> None:
 	output_root.mkdir(parents=True, exist_ok=True)
 	semaphore = asyncio.Semaphore(max_concurrency)
@@ -551,7 +574,12 @@ async def crawl_and_export(
 						clean_started = time.perf_counter()
 						raw_markdown = pick_markdown(result)
 						raw_html = getattr(result, "html", "") or ""
-						markdown = clean_markdown_content(raw_markdown, url=url)
+						markdown = clean_markdown_content(
+							raw_markdown,
+							url=url,
+							footer_markers=footer_markers,
+							slug_stop=slug_stop,
+						)
 						clean_elapsed = time.perf_counter() - clean_started
 						print(f"[STEP] {url} markdown cleanup: {_fmt_seconds(clean_elapsed)}")
 
@@ -740,6 +768,16 @@ def parse_args() -> argparse.Namespace:
 		default=0,
 		help="Process only the first N URLs from input (0 = all).",
 	)
+	parser.add_argument(
+		"--footer-markers",
+		default=None,
+		help="Path to txt file containing footer markers, one per line.",
+	)
+	parser.add_argument(
+		"--slug-stop",
+		default=None,
+		help="Path to txt file containing slug stop words, one per line.",
+	)
 	return parser.parse_args()
 
 
@@ -758,6 +796,9 @@ def main() -> None:
 	if args.limit > 0:
 		links = links[:args.limit]
 
+	footer_markers = tuple(read_config_lines(args.footer_markers)) if args.footer_markers else _DEFAULT_FOOTER_MARKERS
+	slug_stop = frozenset(read_config_lines(args.slug_stop)) if args.slug_stop else None
+
 	run_config = build_run_config_from_args(args)
 
 	asyncio.run(
@@ -770,6 +811,8 @@ def main() -> None:
 			request_timeout=max(1.0, args.request_timeout),
 			table_processing=args.table_processing,
 			append_table_div_html=args.append_table_div_html,
+			footer_markers=footer_markers,
+			slug_stop=slug_stop,
 		)
 	)
 

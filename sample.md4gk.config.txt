@@ -1,0 +1,12 @@
+# md4gk config file (use with --config-file)
+# Format: key=value
+# Lines starting with # are ignored.
+
+input_dir=test-llm
+output_dir=test-llm-normalized
+provider=openai
+model=openai/gpt-4o-mini
+api_key=
+env_file=.env
+limit=0
+instruction_file=sample.md4gk.instruction.txt

@@ -1,0 +1,19 @@
+# Sample config for parser.py
+#
+# Use this file as input for --footer-markers or --slug-stop
+# Lines starting with # are ignored.
+
+# Example footer markers (for --footer-markers):
+ARBIN-logo_white.svg
+Arbin Instruments. All Rights Reserved
+Terms & Conditions
+MITS accessibility statement
+Voluntary Product Accessibility Template
+
+# Example slug stopwords (for --slug-stop):
+product
+products
+category
+tag
+page
+html

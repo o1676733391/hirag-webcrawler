@@ -1,3 +1,0 @@
-=== Lua Script Control ===
-
-- https://www.arbin.com/software-solution/lua-script-feature.html

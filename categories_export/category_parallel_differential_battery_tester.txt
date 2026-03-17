@@ -1,3 +1,0 @@
-=== Parallel Differential Battery Tester ===
-
-- https://www.arbin.com/battery-research/parallel-differential-battery-tester-with-integrated-chamber.html

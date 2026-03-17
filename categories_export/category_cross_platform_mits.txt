@@ -1,9 +1,0 @@
-=== Cross Platform MITS ===
-
-- https://www.arbin.com/software-solution/cross-platform-mits.html
-- https://www.arbin.com/software-solution/mits-for-windows.html
-- https://www.arbin.com/software-solution/mits-for-mac.html
-- https://www.arbin.com/software-solution/mits-for-linux.html
-- https://www.arbin.com/software-solution/overview-mits-11.html
-- https://www.arbin.com/mits-10-software.html
-- https://www.arbin.com/mits-8-software.html

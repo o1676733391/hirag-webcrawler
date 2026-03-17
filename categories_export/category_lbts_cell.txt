@@ -1,3 +1,0 @@
-=== LBTS-Cell ===
-
-- https://www.arbin.com/battery-testing/lbts-cell.html

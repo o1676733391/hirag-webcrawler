@@ -1,8 +1,0 @@
-=== Multi Zone Temperature Chamber ===
-
-- https://www.arbin.com/auxiliary-modules/multi-zone-temperature-chamber.html
-- https://www.arbin.com/battery-research/auxiliary.html
-- https://www.arbin.com/auxiliary-modules/battery-holders-and-battery-racks.html
-- https://www.arbin.com/battery-research/multi-zone-open-rack.html
-- https://www.arbin.com/auxiliary-modules/arbin-smart-battery-tray-with-thermal-chamber.html
-- https://www.arbin.com/battery-research/multi-zone-temperature-chamber.html

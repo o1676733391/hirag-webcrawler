@@ -1,0 +1,9 @@
+# Slug stop words for parser.py (--slug-stop)
+# One word/token per line. Lines starting with # are ignored.
+
+product
+products
+category
+tag
+page
+html

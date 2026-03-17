@@ -1,7 +1,0 @@
-=== High-Precision Battery Tester ===
-
-- https://www.arbin.com/battery-research/high-precision-battery-tester-with-integrated-chamber.html
-- https://www.arbin.com/battery-research/laboratory-battery-tester-with-integrated-chamber.html
-- https://www.arbin.com/battery-research/parallel-differential-battery-tester-with-integrated-chamber.html
-- https://www.arbin.com/battery-research/high-precision-battery-tester.html
-- https://www.arbin.com/battery-research/laboratory-battery-tester.html

@@ -1,3 +1,0 @@
-=== RBT-Module ===
-
-- https://www.arbin.com/battery-testing/rbt4-module.html

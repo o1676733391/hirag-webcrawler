@@ -8,10 +8,10 @@ from collections import defaultdict
 import re
 
 
-def parse_allowed_locales(value):
-    if not value:
+def parse_allowed_locales(locales_csv):
+    if not locales_csv:
         return {'en', 'en-us', 'en-gb'}
-    parts = [p.strip().lower() for p in value.split(',') if p.strip()]
+    parts = [p.strip().lower() for p in locales_csv.split(',') if p.strip()]
     return set(parts) or {'en', 'en-us', 'en-gb'}
 
 
@@ -34,12 +34,12 @@ def is_allowed_language_url(full_url, domain, language_mode='english', allowed_l
 
     first_segment = path.split('/')[0]
 
-    # Nếu URL có prefix ngôn ngữ thì chỉ giữ English
+    # If URL has a locale prefix, only keep allowed English locales.
     locale_pattern = r'^[a-z]{2}(?:-[a-z]{2})?$'
     if re.match(locale_pattern, first_segment):
         return first_segment in allowed_locales
 
-    # Chặn một số slug ngôn ngữ phổ biến không phải English
+    # Block common non-English locale prefixes.
     non_english_prefixes = {
         'vi', 'zh', 'zh-cn', 'zh-hans', 'zh-hant', 'ja', 'ko', 'fr', 'de', 'es', 'it',
         'pt', 'pt-br', 'ru', 'th', 'id', 'tr', 'pl', 'nl', 'ar'
@@ -62,7 +62,7 @@ def normalize_internal_page_url(current_url, href, domain, language_mode='englis
 
     parsed = urlparse(clean_url)
 
-    # Bỏ các đường dẫn bảo vệ email của Cloudflare và tài nguyên không phải HTML page
+    # Skip Cloudflare email-protection endpoints and non-HTML resources.
     if '/cdn-cgi/l/email-protection' in parsed.path.lower():
         return None
 
@@ -77,16 +77,16 @@ def normalize_internal_page_url(current_url, href, domain, language_mode='englis
 
     return clean_url
 
-def crawl_link_tree(url, max_depth=2, language_mode='english', allowed_locales=None, timeout=10):
+def crawl_link_tree(root_url, max_depth=2, language_mode='english', allowed_locales=None, timeout=10):
     visited = set()
     tree = {}
 
-    def get_links(current_url, depth):
+    def crawl_from_url(current_url, depth):
         if depth > max_depth or current_url in visited:
             return
         
         visited.add(current_url)
-        domain = urlparse(url).netloc
+        domain = urlparse(root_url).netloc
         
         try:
             response = requests.get(current_url, timeout=timeout, verify=certifi.where())
@@ -106,30 +106,30 @@ def crawl_link_tree(url, max_depth=2, language_mode='english', allowed_locales=N
                 if full_url:
                     links.append(full_url)
             
-            # Lưu cấu trúc vào cây
+            # Store page relationships in the tree.
             tree[current_url] = list(dict.fromkeys(links))
 
-            # Đệ quy để đào sâu hơn
+            # Recursively crawl child links.
             for link in links:
-                get_links(link, depth + 1)
+                crawl_from_url(link, depth + 1)
         except Exception as e:
-            print(f"Lỗi khi crawl {current_url}: {e}")
+            print(f"Error while crawling {current_url}: {e}")
 
-    get_links(url, 0)
+    crawl_from_url(root_url, 0)
     return tree
 
 
-def extract_dropdown_categories(url, language_mode='english', allowed_locales=None, timeout=10):
-    """Lấy nhóm link từ menu dropdown (ví dụ: Products, Resources, ...)."""
+def extract_dropdown_categories(root_url, language_mode='english', allowed_locales=None, timeout=10):
+    """Extract grouped links from dropdown menus (e.g., Products, Resources)."""
     categories = defaultdict(list)
 
     try:
-        response = requests.get(url, timeout=timeout, verify=certifi.where())
+        response = requests.get(root_url, timeout=timeout, verify=certifi.where())
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
-        domain = urlparse(url).netloc
+        domain = urlparse(root_url).netloc
 
-        # Ưu tiên các khu vực menu điều hướng
+        # Prefer navigation/menu containers first.
         containers = soup.select('nav, header, .menu, .navbar, .navigation')
         if not containers:
             containers = [soup]
@@ -140,7 +140,7 @@ def extract_dropdown_categories(url, language_mode='english', allowed_locales=No
                 if not top_link:
                     continue
 
-                # Tìm link con trong dropdown/submenu
+                # Find child links in dropdown/submenu blocks.
                 child_links = li_tag.select('ul a[href], .dropdown-menu a[href], .sub-menu a[href]')
                 if not child_links:
                     continue
@@ -152,7 +152,7 @@ def extract_dropdown_categories(url, language_mode='english', allowed_locales=No
                 for a_tag in child_links:
                     link = a_tag['href']
                     full_url = normalize_internal_page_url(
-                        url,
+                        root_url,
                         link,
                         domain,
                         language_mode=language_mode,
@@ -161,15 +161,15 @@ def extract_dropdown_categories(url, language_mode='english', allowed_locales=No
                     if full_url:
                         categories[category_name].append(full_url)
 
-        # Loại trùng, giữ thứ tự
+        # De-duplicate while preserving order.
         return {name: list(dict.fromkeys(links)) for name, links in categories.items() if links}
     except Exception as e:
-        print(f"Lỗi khi lấy dropdown categories từ {url}: {e}")
+        print(f"Error while extracting dropdown categories from {root_url}: {e}")
         return {}
 
 
 def categorize_links_by_keyword(link_tree):
-    """Phân loại theo URL/path nếu không bắt được dropdown rõ ràng."""
+    """Categorize by URL/path when clear dropdown groups are not detected."""
     keyword_map = {
         'Products': ['product', 'products', 'solution', 'solutions'],
         'Resources': ['resource', 'resources', 'blog', 'news', 'webinar', 'whitepaper', 'case-study', 'docs'],
@@ -333,7 +333,7 @@ def main():
         timeout=max(1, args.timeout),
     )
 
-    # Nếu không lấy được dropdown rõ ràng thì fallback sang phân loại theo keyword URL
+    # If dropdown extraction fails, fall back to URL keyword categorization.
     category_structure = dropdown_categories if dropdown_categories else categorize_links_by_keyword(link_structure)
 
     unique_links = collect_unique_links(link_structure, category_structure)
@@ -346,11 +346,11 @@ def main():
         for child in children[:5]:
             print(f"  └── [Child]: {child}")
 
-    print("\nĐã export:")
+    print("\nExported files:")
     print(f"- {args.output_tree}")
     print(f"- {args.output_unique_links}")
     print(f"- {args.output_categories_dir}/categories_summary.txt")
-    print(f"- {args.output_categories_dir}/category_<ten_category>.txt")
+    print(f"- {args.output_categories_dir}/category_<category_name>.txt")
 
 
 if __name__ == '__main__':

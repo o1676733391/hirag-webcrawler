@@ -1,3 +1,0 @@
-=== LBTS-Cell High Volume ===
-
-- https://www.arbin.com/battery-testing/lbts-cell-high-volume.html

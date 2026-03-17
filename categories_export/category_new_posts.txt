@@ -1,7 +1,0 @@
-=== New Posts ===
-
-- https://www.arbin.com/blog.html
-- https://www.arbin.com/how-to-plot-potential-vs-current-graph-by-arbin-data-watcher.html
-- https://www.arbin.com/accuracy-and-precision-overview.html
-- https://www.arbin.com/overview-about-what-arbin-product-to-choose-regenerative-features.html
-- https://www.arbin.com/test-ev-battery-pack-with-real-time-drive-condition-using-simulation-control-types.html

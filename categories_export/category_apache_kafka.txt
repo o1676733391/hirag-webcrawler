@@ -1,3 +1,0 @@
-=== Apache Kafka ===
-
-- https://www.arbin.com/software-solution/arbin-integrated-apache-kafka-for-data-streaming-solutions.html

@@ -1,0 +1,8 @@
+# Footer markers for parser.py (--footer-markers)
+# One marker per line. Lines starting with # are ignored.
+
+ARBIN-logo_white.svg
+Arbin Instruments. All Rights Reserved
+Terms & Conditions
+MITS accessibility statement
+Voluntary Product Accessibility Template

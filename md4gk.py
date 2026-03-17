@@ -8,6 +8,11 @@ from pathlib import Path
 
 from litellm import completion
 
+_DEFAULT_INPUT_DIR = "md_export_old"
+_DEFAULT_OUTPUT_DIR = "md_export_normalized"
+_DEFAULT_ENV_FILE = ".env"
+_DEFAULT_LIMIT = 0
+
 _LLM_NORMALIZE_MD_INSTRUCTION = """You are a technical documentation normalization engine.
 
 You will receive a raw markdown document extracted from a webpage.
@@ -441,9 +446,11 @@ def normalize_markdown_with_llm(
 	markdown: str,
 	provider: str,
 	api_token: str | None = None,
+	instruction_text: str | None = None,
 ) -> tuple[str, UsageStats]:
 	"""Run direct LLM normalization on local markdown text and return cleaned markdown and usage."""
-	prompt = f"{_LLM_NORMALIZE_MD_INSTRUCTION}\n\nRaw markdown:\n{markdown}"
+	instruction = (instruction_text or _LLM_NORMALIZE_MD_INSTRUCTION).strip()
+	prompt = f"{instruction}\n\nRaw markdown:\n{markdown}"
 	kwargs = {
 		"model": provider,
 		"messages": [{"role": "user", "content": prompt}],
@@ -463,6 +470,7 @@ def process_existing_markdown_normalization(
 	provider: str,
 	api_token: str | None = None,
 	limit: int = 0,
+	instruction_text: str | None = None,
 ) -> None:
 	"""Normalize existing markdown files with an LLM and write cleaned markdown files."""
 	if not input_dir.exists():
@@ -487,6 +495,7 @@ def process_existing_markdown_normalization(
 				markdown,
 				provider=provider,
 				api_token=api_token,
+				instruction_text=instruction_text,
 			)
 			if not normalized:
 				raise ValueError("LLM returned empty normalized markdown")
@@ -524,10 +533,10 @@ def parse_args() -> argparse.Namespace:
 	parser = argparse.ArgumentParser(
 		description="Normalize existing markdown exports into a consistent knowledge-graph-ready schema."
 	)
-	parser.add_argument("--input-dir", default="md_export_old", help="Directory containing source markdown files.")
+	parser.add_argument("--input-dir", default=_DEFAULT_INPUT_DIR, help="Directory containing source markdown files.")
 	parser.add_argument(
 		"--output-dir",
-		default="md_export_normalized",
+		default=_DEFAULT_OUTPUT_DIR,
 		help="Directory where normalized markdown files will be written.",
 	)
 	parser.add_argument(
@@ -548,32 +557,97 @@ def parse_args() -> argparse.Namespace:
 	)
 	parser.add_argument(
 		"--env-file",
-		default=".env",
+		default=_DEFAULT_ENV_FILE,
 		help="Path to .env file used for provider/model/api-key resolution.",
 	)
 	parser.add_argument(
 		"--limit",
 		type=int,
-		default=0,
+		default=_DEFAULT_LIMIT,
 		help="Limit number of markdown files to process (0 means all).",
+	)
+	parser.add_argument(
+		"--instruction-file",
+		default="",
+		help="Path to a txt/markdown file containing the LLM normalization instruction. If omitted, use the built-in instruction.",
+	)
+	parser.add_argument(
+		"--config-file",
+		default="",
+		help="Path to txt config file (key=value) for md4gk settings.",
 	)
 	return parser.parse_args()
 
 
+def read_instruction_file(path: str) -> str | None:
+	"""Read custom instruction text from file if provided."""
+	if not path:
+		return None
+	instruction_path = Path(path)
+	if not instruction_path.exists():
+		raise FileNotFoundError(f"Instruction file not found: {instruction_path}")
+	text = instruction_path.read_text(encoding="utf-8").strip()
+	if not text:
+		raise ValueError(f"Instruction file is empty: {instruction_path}")
+	return text
+
+
+def read_txt_config(path: str) -> dict[str, str]:
+	"""Read key=value pairs from a txt config file."""
+	if not path:
+		return {}
+	config_path = Path(path)
+	if not config_path.exists():
+		raise FileNotFoundError(f"Config file not found: {config_path}")
+
+	config: dict[str, str] = {}
+	for raw_line in config_path.read_text(encoding="utf-8").splitlines():
+		line = raw_line.strip()
+		if not line or line.startswith("#") or "=" not in line:
+			continue
+		key, value = line.split("=", 1)
+		key = key.strip().lower().replace("-", "_")
+		value = value.strip().strip('"').strip("'")
+		if key:
+			config[key] = value
+	return config
+
+
 def main() -> None:
 	args = parse_args()
+	txt_config = read_txt_config(args.config_file)
+
+	def pick_value(cli_value: str, cli_default: str, config_key: str) -> str:
+		if cli_value != cli_default:
+			return cli_value
+		return txt_config.get(config_key, cli_value)
+
+	input_dir_value = pick_value(args.input_dir, _DEFAULT_INPUT_DIR, "input_dir")
+	output_dir_value = pick_value(args.output_dir, _DEFAULT_OUTPUT_DIR, "output_dir")
+	env_file_value = pick_value(args.env_file, _DEFAULT_ENV_FILE, "env_file")
+	provider_value = pick_value(args.provider, "", "provider")
+	model_value = pick_value(args.model, "", "model")
+	api_key_value = pick_value(args.api_key, "", "api_key")
+	instruction_file_value = pick_value(args.instruction_file, "", "instruction_file")
+
+	limit_value = args.limit
+	if args.limit == _DEFAULT_LIMIT and "limit" in txt_config:
+		limit_value = int(txt_config["limit"])
+
+	instruction_text = read_instruction_file(instruction_file_value)
 	config = resolve_model_config(
-		provider_name=args.provider or None,
-		model=args.model or None,
-		api_key=args.api_key or None,
-		env_file=Path(args.env_file),
+		provider_name=provider_value or None,
+		model=model_value or None,
+		api_key=api_key_value or None,
+		env_file=Path(env_file_value),
 	)
 	process_existing_markdown_normalization(
-		input_dir=Path(args.input_dir),
-		output_dir=Path(args.output_dir),
+		input_dir=Path(input_dir_value),
+		output_dir=Path(output_dir_value),
 		provider=config.model,
 		api_token=config.api_key,
-		limit=max(0, args.limit),
+		limit=max(0, limit_value),
+		instruction_text=instruction_text,
 	)
 
 
