@@ -7,3 +7,4 @@ __pycache__
 *.pyd
 ignore/
 /ignore/
+hirag.config.txt

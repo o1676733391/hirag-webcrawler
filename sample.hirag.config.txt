@@ -1,0 +1,21 @@
+# HiRAG runner config (key=value)
+input_dir=demo_v2_norm
+working_dir=hirag_workdir
+limit=0
+env_file=.env
+
+# OpenAI settings
+openai_api_key=
+openai_base_url=
+chat_model=gpt-4o-mini
+temperature=0.1
+top_p=1.0
+embedding_model=text-embedding-3-small
+embedding_dim=1536
+
+# HiRAG settings
+enable_llm_cache=true
+enable_hierachical_mode=true
+enable_naive_rag=true
+embedding_batch_num=6
+embedding_func_max_async=8
